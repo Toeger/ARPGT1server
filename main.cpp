@@ -18,8 +18,6 @@ namespace Config{
 }
 
 void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, const char *address){
-	(void)buffer;
-	(void)size;
 	std::cout << size << " bytes from " << address << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
 }
 
