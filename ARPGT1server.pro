@@ -19,4 +19,5 @@ HEADERS += \
     ECS/entity_base.h \
     ECS/entity_handle.h \
     ECS/system.h \
-    ECS/systemiterator.h
+    ECS/systemiterator.h \
+    ECS/utility.h
