@@ -4,7 +4,16 @@
 #include <arpa/inet.h>
 #include <array>
 #include <cassert>
+#include <vector>
+
 #include "Utility/asserts.h"
+#include "ECS/entity.h"
+#include "ECS/entity_handle.h"
+
+namespace Config{
+	const std::size_t MAX_UDP_PAYLOAD = 512;
+	const short int port = 12345;
+}
 
 template <class Tout, class Tin>
 Tout *any_cast(Tin *p){
@@ -12,13 +21,53 @@ Tout *any_cast(Tin *p){
 	return static_cast<Tout *>(vp);
 }
 
-namespace Config{
-	const std::size_t MAX_UDP_PAYLOAD = 512;
-	const short int port = 12345;
+bool operator ==(in_addr lhs, in_addr rhs){
+	return lhs.s_addr == rhs.s_addr;
 }
 
-void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, const char *address){
-	std::cout << size << " bytes from " << address << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
+bool operator !=(in_addr lhs, in_addr rhs){
+	return lhs.s_addr != rhs.s_addr;
+}
+
+bool operator <(in_addr lhs, in_addr rhs){
+	return lhs.s_addr < rhs.s_addr;
+}
+
+struct Connections{
+	static ECS::Entity_handle get(in_addr ip){
+		auto pos = std::lower_bound(begin(ips), end(ips), ip);
+		if (*pos != ip)
+			return {};
+		return handles[pos - begin(ips)];
+	}
+	static void add(in_addr ip, ECS::Entity_handle entity){
+		auto pos = std::lower_bound(begin(ips), end(ips), ip);
+		assert_fast(*pos != ip);
+		handles.insert(pos - begin(ips) + begin(handles), entity);
+		ips.insert(pos, ip);
+	}
+
+private:
+	static std::vector<in_addr> ips;
+	static std::vector<ECS::Entity_handle> handles;
+};
+
+std::vector<in_addr> Connections::ips;
+std::vector<ECS::Entity_handle> Connections::handles;
+
+struct Player : ECS::Entity{
+	in_addr address;
+
+};
+
+void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, in_addr ip){
+	std::cout << size << " bytes from " << inet_ntoa(ip) << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
+	auto entity = Connections::get(ip);
+	if (!entity){
+		//someone who is not logged in
+		return;
+	}
+	//someone who is logged in
 }
 
 void reader(int fd){
@@ -33,7 +82,7 @@ void reader(int fd){
 			continue;
 		}
 		//data recieved
-		handle(buffer, size, inet_ntoa(sender.sin_addr));
+		handle(buffer, size, sender.sin_addr);
 	}
 }
 
