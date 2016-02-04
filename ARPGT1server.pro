@@ -5,7 +5,7 @@ CONFIG -= qt
 SOURCES += main.cpp \
     ECS/entity_base.cpp
 
-QMAKE_CXXFLAGS += -std=c++1z
+QMAKE_CXXFLAGS += -std=c++14
 debug:QMAKE_CXXFLAGS += -O1 -fno-omit-frame-pointer -Wall -Werror -g
 debug:QMAKE_CXXFLAGS_WARN_ON += -Wno-missing-braces #-Wno-unused-parameter
 #debug:QMAKE_CXXFLAGS += -fsanitize=address
