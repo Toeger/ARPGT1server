@@ -60,8 +60,10 @@ struct Player : ECS::Entity{
 
 };
 
-void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, in_addr ip){
-	std::cout << size << " bytes from " << inet_ntoa(ip) << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
+void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, sockaddr_in &sender, int fd){
+	std::cout << size << " bytes from " << inet_ntoa(sender.sin_addr)
+			  << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
+	sendto(fd, buffer.data(), size, 0, any_cast<sockaddr>(&sender), sizeof sender);
 	auto entity = Connections::get(ip);
 	if (!entity){
 		//someone who is not logged in
@@ -82,7 +84,7 @@ void reader(int fd){
 			continue;
 		}
 		//data recieved
-		handle(buffer, size, sender.sin_addr);
+		handle(buffer, size, sender, fd);
 	}
 }
 
