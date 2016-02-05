@@ -5,6 +5,7 @@
 #include <array>
 #include <cassert>
 #include <vector>
+#include <string>
 
 #include "Utility/asserts.h"
 #include "ECS/entity.h"
@@ -64,7 +65,8 @@ struct Player : ECS::Entity{
 void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, sockaddr_in &sender, int fd){
 	std::cout << size << " bytes from " << inet_ntoa(sender.sin_addr)
 			  << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
-	sendto(fd, buffer.data(), size, 0, any_cast<sockaddr>(&sender), sizeof sender);
+	std::string reply = "Echo: " + std::string(begin(buffer), begin(buffer) + size);
+	sendto(fd, reply.data(), reply.size(), 0, any_cast<sockaddr>(&sender), sizeof sender);
 	auto entity = Connections::get({sender.sin_addr, sender.sin_port});
 	if (!entity){
 		//someone who is not logged in
