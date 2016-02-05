@@ -1,0 +1,15 @@
+Plan for the network:
+    Encryption
+        Need to verify packet origin to avoid people messing with other people
+        Use RSA with the server's certificate to send half a random AES key to the server
+        Server sends half an AES key back encrypted with the first half
+        Server and client combine client-half and server-half to the same AES key
+        Encrypt all packets with per-user AES key
+        Need to resend lost packets
+    Alternative
+        Make a login server that uses SSL to pass the AES key
+        TCP would handle lost packets
+        SSL would handle encryption
+    Issues
+        Figure out how to send floats. Convert to string? Convert to int?
+        Figure out why the close function is not found.

@@ -58,12 +58,11 @@ std::vector<Connections::Address> Connections::addresses;
 std::vector<ECS::Entity_handle> Connections::handles;
 
 struct Player : ECS::Entity{
-	in_addr address;
-
+	Connections address;
 };
 
 void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size, sockaddr_in &sender, int fd){
-	std::cout << size << " bytes from " << inet_ntoa(sender.sin_addr)
+	std::cout << size << " bytes from " << inet_ntoa(sender.sin_addr) << ':' << sender.sin_port
 			  << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
 	std::string reply = "Echo: " + std::string(begin(buffer), begin(buffer) + size);
 	sendto(fd, reply.data(), reply.size(), 0, any_cast<sockaddr>(&sender), sizeof sender);

@@ -22,3 +22,6 @@ HEADERS += \
     ECS/system.h \
     ECS/systemiterator.h \
     ECS/utility.h
+
+DISTFILES += \
+    TODO.txt
