@@ -34,25 +34,26 @@ bool operator <(in_addr lhs, in_addr rhs){
 }
 
 struct Connections{
-	static ECS::Entity_handle get(in_addr ip){
-		auto pos = std::lower_bound(begin(ips), end(ips), ip);
-		if (*pos != ip)
+	using Address = std::pair<in_addr, in_port_t>;
+	static ECS::Entity_handle get(Address address){
+		auto pos = std::lower_bound(begin(addresses), end(addresses), address);
+		if (*pos != address)
 			return {};
-		return handles[pos - begin(ips)];
+		return handles[pos - begin(addresses)];
 	}
-	static void add(in_addr ip, ECS::Entity_handle entity){
-		auto pos = std::lower_bound(begin(ips), end(ips), ip);
-		assert_fast(*pos != ip);
-		handles.insert(pos - begin(ips) + begin(handles), entity);
-		ips.insert(pos, ip);
+	static void add(Address address, ECS::Entity_handle entity){
+		auto pos = std::lower_bound(begin(addresses), end(addresses), address);
+		assert_fast(*pos != address);
+		handles.insert(pos - begin(addresses) + begin(handles), entity);
+		addresses.insert(pos, address);
 	}
 
 private:
-	static std::vector<in_addr> ips;
+	static std::vector<Address> addresses;
 	static std::vector<ECS::Entity_handle> handles;
 };
 
-std::vector<in_addr> Connections::ips;
+std::vector<Connections::Address> Connections::addresses;
 std::vector<ECS::Entity_handle> Connections::handles;
 
 struct Player : ECS::Entity{
@@ -64,7 +65,7 @@ void handle(std::array<unsigned char, Config::MAX_UDP_PAYLOAD> &buffer, int size
 	std::cout << size << " bytes from " << inet_ntoa(sender.sin_addr)
 			  << " with content: " << std::string(buffer.data(), buffer.data() + size) << '\n' << std::flush;
 	sendto(fd, buffer.data(), size, 0, any_cast<sockaddr>(&sender), sizeof sender);
-	auto entity = Connections::get(ip);
+	auto entity = Connections::get({sender.sin_addr, sender.sin_port});
 	if (!entity){
 		//someone who is not logged in
 		return;
