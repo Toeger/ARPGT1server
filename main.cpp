@@ -12,7 +12,7 @@
 #include "ECS/entity_handle.h"
 
 namespace Config{
-	const std::size_t MAX_UDP_PAYLOAD = 512;
+	const std::size_t MAX_UDP_PAYLOAD = 1400;
 	const short int port = 12345;
 }
 
